@@ -79,8 +79,9 @@ chown -R kkfileview:kkfileview "$DATA" "$APP/config"
 
 set -- java \
   -Xms64m -Xmx${HEAP}m -Xss512k \
-  -XX:MaxMetaspaceSize=192m -XX:ReservedCodeCacheSize=64m -XX:MaxDirectMemorySize=64m \
+  -XX:MaxMetaspaceSize=192m -XX:ReservedCodeCacheSize=48m -XX:MaxDirectMemorySize=64m \
   -XX:+UseSerialGC -XX:ActiveProcessorCount=$CPUS \
+  -XX:TieredStopAtLevel=1 -XX:CICompilerCount=1 \
   -XX:+ExitOnOutOfMemoryError \
   -Djava.awt.headless=true -Dfile.encoding=UTF-8 \
   -Djava.io.tmpdir=/tmp \
