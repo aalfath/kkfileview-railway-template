@@ -10,14 +10,18 @@ log() { echo "[kkfileview-start] $*"; }
 
 # ---- trust list: kkFileView only fetches files from these hosts (it is not an open proxy) ----
 TRUST=$(printf '%s' "${KK_TRUST_HOST:-}" | tr -d ' ')
-if [ -z "$TRUST" ] || [ "$TRUST" = "default" ]; then
-  log "KK_TRUST_HOST is empty: set it to the comma-separated hosts whose files may be previewed (e.g. files.example.com,*.example.org)." >&2
-  exit 1
+if [ "$TRUST" = "default" ]; then TRUST=""; fi
+if [ "$TRUST" = "*" ]; then
+  log "WARNING: KK_TRUST_HOST=* lets anyone use this server to fetch any public URL. Prefer a list of your own file hosts." >&2
 fi
 # The app's own domain must be trusted for its converted-image pages to load.
 for d in "${RAILWAY_PUBLIC_DOMAIN:-}" "${KK_EXTRA_SELF_HOST:-}"; do
-  [ -n "$d" ] && TRUST="$TRUST,$d"
+  [ -n "$d" ] && TRUST="${TRUST:+$TRUST,}$d"
 done
+if [ -z "$TRUST" ]; then
+  log "WARNING: KK_TRUST_HOST is empty, so every preview will be refused. Set it to the hosts that serve your files (e.g. files.example.com,*.example.org)." >&2
+  TRUST="localhost.invalid"
+fi
 export KK_TRUST_HOST="$TRUST"
 # Private, loopback, link-local and Railway-internal addresses are always refused (blocklist wins over the trust list).
 export KK_NOT_TRUST_HOST="${KK_NOT_TRUST_HOST:-localhost,*.localhost,*.railway.internal,*.internal,metadata.google.internal,127.0.0.0/8,0.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,100.64.0.0/10,169.254.0.0/16,[::1],::1,[::],::}"
