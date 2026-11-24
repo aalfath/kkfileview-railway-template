@@ -1,0 +1,1 @@
+Hello from the kkFileView Railway template smoke test.
